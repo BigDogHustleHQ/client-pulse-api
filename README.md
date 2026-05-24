@@ -1,2 +1,3 @@
 # client-pulse-api
-Client Pulse API
+
+ClientPulse API — NestJS + GraphQL backend. See `CLAUDE.md` for commands and architecture.
