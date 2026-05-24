@@ -1,7 +1,9 @@
 import { INestApplication } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
+import { ExecutionResult } from 'graphql';
 import request from 'supertest';
 import { App } from 'supertest/types';
+
 import { AppModule } from './app.module';
 
 describe('App (e2e)', () => {
@@ -25,8 +27,9 @@ describe('App (e2e)', () => {
       .post('/graphql')
       .send({ query: '{ health }' })
       .expect(200)
-      .expect((res) => {
-        expect(res.body.data.health).toBe('ok');
+      .expect((response) => {
+        const body = response.body as ExecutionResult<{ health: string }>;
+        expect(body.data?.health).toEqual('ok');
       });
   });
 });
