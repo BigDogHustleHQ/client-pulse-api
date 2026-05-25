@@ -1,12 +1,12 @@
 import { NestApplication, NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import { Logger } from '@nestjs/common';
+import { WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
 
 async function bootstrap() {
-  const app: NestApplication = await NestFactory.create(AppModule);
+  const app: NestApplication = await NestFactory.create(AppModule, { bufferLogs: true });
+  app.useLogger(app.get(WINSTON_MODULE_NEST_PROVIDER));
 
   await app.listen(process.env.PORT ?? 4000);
-  Logger.log(`Nest application URL: ${await app.getUrl()}`, 'NestApplication');
 }
 
 bootstrap();

@@ -1,0 +1,7 @@
+# ClientPulse API — GraphQL Schema
+# Auto-synced from src/schema.gql by scripts/sync-api-docs.mjs
+# Do not edit by hand — change the resolver and run: npm run sync:api-docs
+
+type Query {
+  health: String!
+}
