@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 /**
- * Keeps bruno/ and docs/api-spec.graphql in sync with src/schema.gql.
+ * Keeps bruno/queries/, bruno/mutations/, and docs/api-spec.graphql in sync
+ * with src/schema.gql.
  *
  * Usage:
  *   npm run sync:api-docs          — manual run after restarting dev server
@@ -10,12 +11,24 @@
  *
  * NOTE: src/schema.gql is generated at app startup by NestJS. Make sure
  * `npm run start:dev` has run at least once before syncing.
+ *
+ * bruno/queries/ and bruno/mutations/ are ALWAYS overwritten — treat them as
+ * derived artifacts. For custom multi-step test flows use bruno/scenarios/,
+ * which this script never touches.
  */
 
 import { readFileSync, writeFileSync, mkdirSync, existsSync } from 'fs';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
-import { buildSchema, getNamedType, isScalarType, isObjectType, isEnumType } from 'graphql';
+import {
+  buildSchema,
+  getNamedType,
+  isScalarType,
+  isObjectType,
+  isEnumType,
+  isListType,
+  isNonNullType,
+} from 'graphql';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(__dirname, '..');
@@ -28,10 +41,31 @@ const API_SPEC_PATH = join(ROOT, 'docs', 'api-spec.graphql');
 function readHookPayload() {
   if (process.stdin.isTTY) return null;
   try {
-    const raw = readFileSync(0, 'utf-8').trim(); // fd 0 = stdin
+    const raw = readFileSync(0, 'utf-8').trim();
     return raw ? JSON.parse(raw) : null;
   } catch {
     return null;
+  }
+}
+
+// ─── Type helpers ────────────────────────────────────────────────────────────
+
+function unwrap(type) {
+  return isNonNullType(type) ? type.ofType : type;
+}
+
+/** Returns the Bruno assert operator appropriate for the field's return type. */
+function assertOp(fieldType) {
+  const t = unwrap(fieldType);
+  if (isListType(t)) return 'isArray';
+  const named = getNamedType(t);
+  if (isEnumType(named)) return 'isString';
+  if (!isScalarType(named)) return 'isNotNull'; // object / interface / union
+  switch (named.name) {
+    case 'Boolean': return 'isBoolean';
+    case 'Int':
+    case 'Float': return 'isNumber';
+    default: return 'isString'; // String, ID, custom scalars
   }
 }
 
@@ -66,22 +100,47 @@ function buildBruFile(name, operation, field, seq) {
   const opHeader = argDef ? ` ${display}${argDef}` : '';
   const body = `${operation}${opHeader} {\n  ${name}${argCall}${selection}\n}`;
 
-  return `meta {
+  // Assertion: type-appropriate check + no errors
+  const op = assertOp(field.type);
+  const assertBlock = `assert {
+  res.status: eq 200
+  res.body.data.${name}: ${op}
+  res.body.errors: isUndefined
+}`;
+
+  // Tests: scaffold — add specific value expectations here
+  const isObj =
+    isObjectType(returnType) && !isScalarType(returnType) && !isEnumType(returnType);
+  const shapeCheck = isObj
+    ? `expect(body.data.${name}).to.not.be.null;`
+    : `expect(body.data).to.have.property("${name}");`;
+
+  const testsBlock = `tests {
+  test("${name} returns without errors", function() {
+    const body = res.getBody();
+    expect(body.errors).to.be.undefined;
+    ${shapeCheck}
+    // TODO: add specific value assertions
+  });
+}`;
+
+  return [
+    `meta {
   name: ${display}
   type: graphql
   seq: ${seq}
-}
-
-post {
+}`,
+    `post {
   url: {{baseUrl}}/graphql
   body: graphql
   auth: none
-}
-
-body:graphql {
+}`,
+    `body:graphql {
   ${body}
-}
-`;
+}`,
+    assertBlock,
+    testsBlock,
+  ].join('\n\n') + '\n';
 }
 
 function syncBrunoCollection(schema) {
@@ -119,7 +178,6 @@ function syncApiSpec(sdl) {
 
 const payload = readHookPayload();
 if (payload) {
-  // Called from Claude Code hook — only sync when a resolver was changed
   const filePath = payload.tool_input?.file_path ?? '';
   if (!filePath.endsWith('.resolver.ts')) process.exit(0);
 }

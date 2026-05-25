@@ -15,3 +15,17 @@ body:graphql {
     health
   }
 }
+
+assert {
+  res.status: eq 200
+  res.body.data.health: isString
+  res.body.errors: isUndefined
+}
+
+tests {
+  test("health returns 'ok'", function() {
+    const body = res.getBody();
+    expect(body.errors).to.be.undefined;
+    expect(body.data.health).to.equal("ok");
+  });
+}
