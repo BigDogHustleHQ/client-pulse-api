@@ -22,3 +22,6 @@ coverage/
 
 # generated
 src/schema.gql
+
+# Bruno CI reports
+test-results/
