@@ -1,3 +1,9 @@
+---
+paths:
+  - "src/**/*.spec.ts"
+  - "test/**/*"
+---
+
 # Testing conventions
 
 - Unit test files use `.spec.ts` suffix (NestJS default), co-located with source
