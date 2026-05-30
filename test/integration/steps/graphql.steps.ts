@@ -1,48 +1,42 @@
 import { DataTable, Given, Then, When } from '@cucumber/cucumber';
 import assert from 'node:assert/strict';
-import { GraphQLWorld } from '../support/world';
+import {
+  getBody,
+  getResponse,
+  sendOperation,
+  setVariables,
+} from '../support/context';
 
-Given(
-  'the GraphQL variables:',
-  function (this: GraphQLWorld, table: DataTable) {
-    this.variables = table.rowsHash();
-  },
-);
+Given('the GraphQL variables:', (table: DataTable): void => {
+  setVariables(table.rowsHash());
+});
 
-When(
-  'I send the GraphQL operation:',
-  async function (this: GraphQLWorld, query: string) {
-    await this.sendOperation(query);
-  },
-);
+When('I send the GraphQL operation:', async (query: string): Promise<void> => {
+  await sendOperation(query);
+});
 
-Then(
-  'the response status should be {int}',
-  function (this: GraphQLWorld, status: number) {
-    assert.ok(this.response, 'No response captured');
-    assert.equal(this.response.status, status);
-  },
-);
+Then('the response status should be {int}', (status: number): void => {
+  assert.equal(getResponse().status, status);
+});
 
-Then(
-  'there should be no GraphQL errors',
-  function (this: GraphQLWorld) {
-    assert.equal(
-      this.body.errors,
-      undefined,
-      `Unexpected GraphQL errors: ${JSON.stringify(this.body.errors)}`,
-    );
-  },
-);
+Then('there should be no GraphQL errors', (): void => {
+  const { errors } = getBody();
+  assert.equal(
+    errors,
+    undefined,
+    `Unexpected GraphQL errors: ${JSON.stringify(errors)}`,
+  );
+});
 
 Then(
   'the GraphQL field {string} should equal {string}',
-  function (this: GraphQLWorld, field: string, expected: string) {
+  (field: string, expected: string): void => {
+    const body = getBody();
     assert.equal(
-      this.body.errors,
+      body.errors,
       undefined,
-      `Unexpected GraphQL errors: ${JSON.stringify(this.body.errors)}`,
+      `Unexpected GraphQL errors: ${JSON.stringify(body.errors)}`,
     );
-    assert.equal(this.body.data?.[field], expected);
+    assert.equal(body.data?.[field], expected);
   },
 );

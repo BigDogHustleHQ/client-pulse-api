@@ -13,7 +13,6 @@ npm run format           # Prettier format src/ and test/
 npm test                 # unit tests
 npm run test:watch       # unit tests in watch mode
 npm run test:coverage    # unit tests with coverage
-npm run test:e2e         # end-to-end tests
 npm run test:integration # Cucumber integration tests (one .feature per endpoint)
 ```
 
@@ -52,13 +51,16 @@ src/
 
 - Unit test files use `.spec.ts` suffix (NestJS default), co-located with source
 - Use `@nestjs/testing` `Test.createTestingModule()` to wire up isolated module contexts
-- E2E tests live in `test/` and use `jest-e2e.json` config
 - Integration tests use **Cucumber** under `test/integration/`, **one `.feature` file per GraphQL endpoint**:
   - `features/<endpoint>.feature` — Gherkin scenarios for that endpoint
   - `steps/` — reusable step definitions (generic GraphQL request/assert steps live in `graphql.steps.ts`)
-  - `support/` — Nest app harness (`app.ts` boots/teardowns once) + custom `World`
+  - `support/context.ts` — module-scoped harness that boots/teardowns the Nest app once and holds per-scenario state (no Cucumber `World`, so steps stay `const` arrows)
   - Config is `cucumber.mjs`; ts-node transpiles via `test/integration/tsconfig.json` (CommonJS)
   - Add a new endpoint test by dropping in a `<endpoint>.feature` — reuse the shared steps, only add endpoint-specific steps when needed
+
+## Code style
+
+- Prefer `const fn = () => {}` over `function fn() {}` — enforced by ESLint `func-style`/`prefer-arrow-callback`
 
 ## Stack
 

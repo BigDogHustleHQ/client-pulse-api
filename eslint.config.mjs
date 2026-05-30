@@ -29,6 +29,9 @@ export default tseslint.config(
       '@typescript-eslint/no-explicit-any': 'off',
       '@typescript-eslint/no-floating-promises': 'warn',
       '@typescript-eslint/no-unsafe-argument': 'warn',
+      // Prefer `const fn = () => {}` over `function fn() {}`.
+      'func-style': ['error', 'expression'],
+      'prefer-arrow-callback': 'error',
       "prettier/prettier": ["error", { endOfLine: "auto" }],
     },
   },
