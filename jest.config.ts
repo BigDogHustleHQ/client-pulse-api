@@ -5,7 +5,13 @@ const config: Config = {
   rootDir: 'src',
   testRegex: '.*\\.spec\\.ts$',
   transform: {
-    '^.+\\.(t|j)s$': 'ts-jest',
+    '^.+\\.(t|j)s$': [
+      'ts-jest',
+      {
+        tsconfig: { isolatedModules: false, importHelpers: true },
+        diagnostics: { ignoreCodes: [151002] },
+      },
+    ],
   },
   collectCoverageFrom: [
     '**/*.ts',
