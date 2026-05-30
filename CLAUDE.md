@@ -22,7 +22,18 @@ To run a single integration feature: `npm run test:integration -- test/integrati
 
 ## Architecture
 
-See `.claude/rules/architecture.md`.
+NestJS 11 with GraphQL (code-first) via Apollo Server 5. Every feature is a NestJS module:
+
+```
+src/
+  <feature>/
+    <feature>.module.ts      # registers resolver, service, and imports
+    <feature>.resolver.ts    # @Resolver — GraphQL queries and mutations
+    <feature>.service.ts     # business logic
+    <feature>.resolver.spec.ts
+```
+
+`AppModule` (`src/app.module.ts`) is the root. GraphQL endpoint: `POST /graphql` — schema auto-generated at `src/schema.gql` on startup (do not edit by hand). Use `@ObjectType()`/`@Field()` for types, `@Query`/`@Mutation` for operations, `@InputType()` for mutation args.
 
 ## Testing conventions
 
@@ -37,14 +48,14 @@ See `.claude/rules/architecture.md`.
 
 ## Code style
 
-See `.claude/rules/code-style.md`.
+- Prefer `const fn = () => {}` over `function fn() {}` — enforced by ESLint `func-style`/`prefer-arrow-callback`
+- **Prettier** — single quotes, 2-space tabs, trailing commas
 
 ## Stack
 
 - **NestJS 11** + **TypeScript 5**
 - **GraphQL** via `@nestjs/graphql` + `@nestjs/apollo` + Apollo Server 5
 - **Jest 30** + `ts-jest` for unit tests
-- **Prettier** — single quotes, 2-space tabs, trailing commas
 - **ESLint 9** flat config with `eslint-plugin-prettier`
 
 ## This project
