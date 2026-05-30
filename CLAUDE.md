@@ -60,7 +60,7 @@ src/
 
 ## Code style
 
-- Prefer `const fn = () => {}` over `function fn() {}` — enforced by ESLint `func-style`/`prefer-arrow-callback`
+See `.claude/rules/code-style.md`.
 
 ## Stack
 
