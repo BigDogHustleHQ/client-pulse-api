@@ -8,6 +8,11 @@ const bootstrap = async (): Promise<void> => {
   });
   app.useLogger(app.get(WINSTON_MODULE_NEST_PROVIDER));
 
+  app.enableCors({
+    origin: process.env.CLIENT_PULSE_FE_DOMAIN ?? 'http://localhost:3000',
+    credentials: true,
+  });
+
   await app.listen(process.env.PORT ?? 4000);
 };
 
