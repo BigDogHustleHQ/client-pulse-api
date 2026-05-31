@@ -7,7 +7,7 @@ jest.mock('@clerk/backend', () => ({
   verifyToken: jest.fn(),
 }));
 
-const mockVerifyToken = verifyToken as jest.MockedFunction<typeof verifyToken>;
+const mockVerifyToken = verifyToken as jest.Mock;
 
 describe('GqlAuthGuard', () => {
   let guard: GqlAuthGuard;
@@ -42,7 +42,7 @@ describe('GqlAuthGuard', () => {
   it('returns true and attaches auth payload to req on valid token', async () => {
     mockReq.headers['authorization'] = 'Bearer valid.jwt.token';
     const payload = { sub: 'user_123', sid: 'sess_abc' };
-    mockVerifyToken.mockResolvedValueOnce(payload as never);
+    mockVerifyToken.mockResolvedValueOnce(payload);
 
     const result = await guard.canActivate({} as ExecutionContext);
 

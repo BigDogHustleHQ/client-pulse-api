@@ -17,6 +17,7 @@ const config: Config = {
     '**/*.ts',
     '!main.ts',
     '!**/*.module.ts',
+    '!**/*.model.ts',
     '!**/*.spec.ts',
   ],
   coverageDirectory: '../coverage',
