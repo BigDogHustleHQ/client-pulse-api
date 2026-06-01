@@ -1,0 +1,16 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  lint:
+    uses: ./.github/workflows/lint.yml
+
+  unit:
+    uses: ./.github/workflows/unit-tests.yml
+
+  integration:
+    uses: ./.github/workflows/integration-tests.yml

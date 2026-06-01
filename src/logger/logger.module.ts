@@ -37,13 +37,13 @@ import type { LoggerOptions } from 'winston';
  *     ],
  *   };
  */
-function createWinstonOptions(): LoggerOptions {
+const createWinstonOptions = (): LoggerOptions => {
   // TODO: replace this stub with your transport configuration (5–10 lines)
   return {
     level: 'info',
     transports: [new transports.Console({ format: format.simple() })],
   };
-}
+};
 
 @Global()
 @Module({

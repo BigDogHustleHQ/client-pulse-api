@@ -17,8 +17,8 @@ const config: Config = {
     '**/*.ts',
     '!main.ts',
     '!**/*.module.ts',
+    '!**/*.model.ts',
     '!**/*.spec.ts',
-    '!**/*.e2e-spec.ts',
   ],
   coverageDirectory: '../coverage',
   coverageThreshold: {
